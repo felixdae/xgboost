@@ -18,25 +18,29 @@ package ml.dmlc.xgboost4j.scala.spark
 
 import ml.dmlc.xgboost4j.{LabeledPoint => XGBLabeledPoint}
 
-import org.apache.spark.ml.feature.{LabeledPoint => MLLabeledPoint}
-import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
+import org.apache.spark.mllib.regression.{LabeledPoint => MLLabeledPoint}
+import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vector, Vectors}
+
+//import org.apache.spark.ml.feature.{LabeledPoint => MLLabeledPoint}
+//import org.apache.spark.ml.linalg.{DenseVector, SparseVector, Vector, Vectors}
 
 object DataUtils extends Serializable {
+
   private[spark] implicit class XGBLabeledPointFeatures(
-      val labeledPoint: XGBLabeledPoint
-  ) extends AnyVal {
+                                                         val labeledPoint: XGBLabeledPoint
+                                                       ) extends AnyVal {
     /** Converts the point to [[MLLabeledPoint]]. */
     private[spark] def asML: MLLabeledPoint = {
       MLLabeledPoint(labeledPoint.label, labeledPoint.features)
     }
 
     /**
-     * Returns feature of the point as [[org.apache.spark.ml.linalg.Vector]].
-     *
-     * If the point is sparse, the dimensionality of the resulting sparse
-     * vector would be [[Int.MaxValue]]. This is the only safe value, since
-     * XGBoost does not store the dimensionality explicitly.
-     */
+      * Returns feature of the point as [[org.apache.spark.mllib.linalg.Vector]].
+      *
+      * If the point is sparse, the dimensionality of the resulting sparse
+      * vector would be [[Int.MaxValue]]. This is the only safe value, since
+      * XGBoost does not store the dimensionality explicitly.
+      */
     def features: Vector = if (labeledPoint.indices == null) {
       Vectors.dense(labeledPoint.values.map(_.toDouble))
     } else {
@@ -45,8 +49,8 @@ object DataUtils extends Serializable {
   }
 
   private[spark] implicit class MLLabeledPointToXGBLabeledPoint(
-      val labeledPoint: MLLabeledPoint
-  ) extends AnyVal {
+                                                                 val labeledPoint: MLLabeledPoint
+                                                               ) extends AnyVal {
     /** Converts an [[MLLabeledPoint]] to an [[XGBLabeledPoint]]. */
     def asXGB: XGBLabeledPoint = {
       labeledPoint.features.asXGB.copy(label = labeledPoint.label.toFloat)
@@ -55,11 +59,11 @@ object DataUtils extends Serializable {
 
   private[spark] implicit class MLVectorToXGBLabeledPoint(val v: Vector) extends AnyVal {
     /**
-     * Converts a [[Vector]] to a data point with a dummy label.
-     *
-     * This is needed for constructing a [[ml.dmlc.xgboost4j.scala.DMatrix]]
-     * for prediction.
-     */
+      * Converts a [[Vector]] to a data point with a dummy label.
+      *
+      * This is needed for constructing a [[ml.dmlc.xgboost4j.scala.DMatrix]]
+      * for prediction.
+      */
     def asXGB: XGBLabeledPoint = v match {
       case v: DenseVector =>
         XGBLabeledPoint(0.0f, null, v.values.map(_.toFloat))
@@ -67,4 +71,5 @@ object DataUtils extends Serializable {
         XGBLabeledPoint(0.0f, v.indices, v.values.map(_.toFloat))
     }
   }
+
 }

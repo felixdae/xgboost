@@ -24,80 +24,88 @@ import org.json4s.jackson.JsonMethods.{compact, parse, render}
 import org.apache.spark.ml.param.{Param, ParamPair, Params}
 
 class GroupDataParam(
-    parent: Params,
-    name: String,
-    doc: String) extends Param[Seq[Seq[Int]]](parent, name, doc) {
+                      parent: Params,
+                      name: String,
+                      doc: String) extends Param[Seq[Seq[Int]]](parent, name, doc) {
 
   /** Creates a param pair with the given value (for Java). */
   override def w(value: Seq[Seq[Int]]): ParamPair[Seq[Seq[Int]]] = super.w(value)
 
-  override def jsonEncode(value: Seq[Seq[Int]]): String = {
+  //  override def jsonEncode(value: Seq[Seq[Int]]): String = {
+  def jsonEncode(value: Seq[Seq[Int]]): String = {
     import org.json4s.jackson.Serialization
     implicit val formats = Serialization.formats(NoTypeHints)
     compact(render(Extraction.decompose(value)))
   }
 
-  override def jsonDecode(json: String): Seq[Seq[Int]] = {
+  //  override def jsonDecode(json: String): Seq[Seq[Int]] = {
+  def jsonDecode(json: String): Seq[Seq[Int]] = {
     implicit val formats = DefaultFormats
     parse(json).extract[Seq[Seq[Int]]]
   }
 }
 
 class CustomEvalParam(
-    parent: Params,
-    name: String,
-    doc: String) extends Param[EvalTrait](parent, name, doc) {
+                       parent: Params,
+                       name: String,
+                       doc: String) extends Param[EvalTrait](parent, name, doc) {
 
   /** Creates a param pair with the given value (for Java). */
   override def w(value: EvalTrait): ParamPair[EvalTrait] = super.w(value)
 
-  override def jsonEncode(value: EvalTrait): String = {
+  //  override def jsonEncode(value: EvalTrait): String = {
+  def jsonEncode(value: EvalTrait): String = {
     import org.json4s.jackson.Serialization
     implicit val formats = Serialization.formats(NoTypeHints)
     compact(render(Extraction.decompose(value)))
   }
 
-  override def jsonDecode(json: String): EvalTrait = {
+  //  override def jsonDecode(json: String): EvalTrait = {
+  def jsonDecode(json: String): EvalTrait = {
     implicit val formats = DefaultFormats
     parse(json).extract[EvalTrait]
   }
 }
 
 class CustomObjParam(
-    parent: Params,
-    name: String,
-    doc: String) extends Param[ObjectiveTrait](parent, name, doc) {
+                      parent: Params,
+                      name: String,
+                      doc: String) extends Param[ObjectiveTrait](parent, name, doc) {
 
   /** Creates a param pair with the given value (for Java). */
   override def w(value: ObjectiveTrait): ParamPair[ObjectiveTrait] = super.w(value)
 
-  override def jsonEncode(value: ObjectiveTrait): String = {
+  //  override def jsonEncode(value: ObjectiveTrait): String = {
+  def jsonEncode(value: ObjectiveTrait): String = {
     import org.json4s.jackson.Serialization
     implicit val formats = Serialization.formats(NoTypeHints)
     compact(render(Extraction.decompose(value)))
   }
 
-  override def jsonDecode(json: String): ObjectiveTrait = {
+  //  override def jsonDecode(json: String): ObjectiveTrait = {
+  def jsonDecode(json: String): ObjectiveTrait = {
     implicit val formats = DefaultFormats
     parse(json).extract[ObjectiveTrait]
   }
 }
 
 class TrackerConfParam(
-    parent: Params,
-    name: String,
-    doc: String) extends Param[TrackerConf](parent, name, doc) {
+                        parent: Params,
+                        name: String,
+                        doc: String) extends Param[TrackerConf](parent, name, doc) {
 
   /** Creates a param pair with the given value (for Java). */
   override def w(value: TrackerConf): ParamPair[TrackerConf] = super.w(value)
 
-  override def jsonEncode(value: TrackerConf): String = {
+  //  override def jsonEncode(value: TrackerConf): String = {
+  def jsonEncode(value: TrackerConf): String = {
     import org.json4s.jackson.Serialization
     implicit val formats = Serialization.formats(NoTypeHints)
     compact(render(Extraction.decompose(value)))
   }
 
-  override def jsonDecode(json: String): TrackerConf = {
+  //  override def jsonDecode(json: String): TrackerConf = {
+  def jsonDecode(json: String): TrackerConf = {
     implicit val formats = DefaultFormats
     val parsedValue = parse(json)
     println(parsedValue.children)

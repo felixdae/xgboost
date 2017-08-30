@@ -16,50 +16,50 @@
 
 package ml.dmlc.xgboost4j.scala.spark
 
-import java.io.File
-
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.SparkSession
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
-
-trait PerTest extends BeforeAndAfterEach { self: FunSuite =>
-  protected val numWorkers: Int = Runtime.getRuntime.availableProcessors()
-
-  @transient private var currentSession: SparkSession = _
-
-  def ss: SparkSession = getOrCreateSession
-  implicit def sc: SparkContext = ss.sparkContext
-
-  protected def sparkSessionBuilder: SparkSession.Builder = SparkSession.builder()
-      .master("local[*]")
-      .appName("XGBoostSuite")
-      .config("spark.ui.enabled", false)
-      .config("spark.driver.memory", "512m")
-
-  override def beforeEach(): Unit = getOrCreateSession
-
-  override def afterEach() {
-    synchronized {
-      if (currentSession != null) {
-        currentSession.stop()
-        cleanExternalCache(currentSession.sparkContext.appName)
-        currentSession = null
-      }
-    }
-  }
-
-  private def getOrCreateSession = synchronized {
-    if (currentSession == null) {
-      currentSession = sparkSessionBuilder.getOrCreate()
-      currentSession.sparkContext.setLogLevel("ERROR")
-    }
-    currentSession
-  }
-
-  private def cleanExternalCache(prefix: String): Unit = {
-    val dir = new File(".")
-    for (file <- dir.listFiles() if file.getName.startsWith(prefix)) {
-      file.delete()
-    }
-  }
-}
+//import java.io.File
+//
+//import org.apache.spark.SparkContext
+//import org.apache.spark.sql.SparkSession
+//import org.scalatest.{BeforeAndAfterEach, FunSuite}
+//
+//trait PerTest extends BeforeAndAfterEach { self: FunSuite =>
+//  protected val numWorkers: Int = Runtime.getRuntime.availableProcessors()
+//
+//  @transient private var currentSession: SparkSession = _
+//
+//  def ss: SparkSession = getOrCreateSession
+//  implicit def sc: SparkContext = ss.sparkContext
+//
+//  protected def sparkSessionBuilder: SparkSession.Builder = SparkSession.builder()
+//      .master("local[*]")
+//      .appName("XGBoostSuite")
+//      .config("spark.ui.enabled", false)
+//      .config("spark.driver.memory", "512m")
+//
+//  override def beforeEach(): Unit = getOrCreateSession
+//
+//  override def afterEach() {
+//    synchronized {
+//      if (currentSession != null) {
+//        currentSession.stop()
+//        cleanExternalCache(currentSession.sparkContext.appName)
+//        currentSession = null
+//      }
+//    }
+//  }
+//
+//  private def getOrCreateSession = synchronized {
+//    if (currentSession == null) {
+//      currentSession = sparkSessionBuilder.getOrCreate()
+//      currentSession.sparkContext.setLogLevel("ERROR")
+//    }
+//    currentSession
+//  }
+//
+//  private def cleanExternalCache(prefix: String): Unit = {
+//    val dir = new File(".")
+//    for (file <- dir.listFiles() if file.getName.startsWith(prefix)) {
+//      file.delete()
+//    }
+//  }
+//}

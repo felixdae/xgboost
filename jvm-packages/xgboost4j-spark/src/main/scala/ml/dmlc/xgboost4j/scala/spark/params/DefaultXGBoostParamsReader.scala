@@ -20,10 +20,11 @@ import org.apache.hadoop.fs.Path
 import org.json4s.{DefaultFormats, JValue}
 import org.json4s.JsonAST.JObject
 import org.json4s.jackson.JsonMethods.{compact, parse, render}
+import org.json4s._
 
 import org.apache.spark.SparkContext
 import org.apache.spark.ml.param.Params
-import org.apache.spark.ml.util.MLReader
+//import org.apache.spark.ml.util.MLReader
 
 // This originates from apache-spark DefaultPramsReader copy paste
 private[spark] object DefaultXGBoostParamsReader {
@@ -103,34 +104,50 @@ private[spark] object DefaultXGBoostParamsReader {
     Metadata(className, uid, timestamp, sparkVersion, params, metadata, metadataStr)
   }
 
-  /**
-   * Extract Params from metadata, and set them in the instance.
-   * This works if all Params implement [[org.apache.spark.ml.param.Param.jsonDecode()]].
-   * TODO: Move to [[Metadata]] method
-   */
-  def getAndSetParams(instance: Params, metadata: Metadata): Unit = {
-    implicit val format = DefaultFormats
-    metadata.params match {
-      case JObject(pairs) =>
-        pairs.foreach { case (paramName, jsonValue) =>
-          val param = instance.getParam(paramName)
-          val value = param.jsonDecode(compact(render(jsonValue)))
-          instance.set(param, value)
-        }
+  def jsonDecode[T](json: String): T = {
+    parse(json) match {
+      case JString(x) =>
+        x.asInstanceOf[T]
+      case JObject(v) =>
+        val keys = v.map(_._1)
+        assert(keys.contains("type") && keys.contains("values"),
+          s"Expect a JSON serialized vector but cannot find fields 'type' and 'values' in $json.")
+        JsonVectorConverter.fromJson(json).asInstanceOf[T]
       case _ =>
-        throw new IllegalArgumentException(
-          s"Cannot recognize JSON metadata: ${metadata.metadataJson}.")
+        throw new NotImplementedError(
+          "The default jsonDecode only supports string and vector. " +
+            s"${this.getClass.getName} must override jsonDecode to support its value type.")
     }
   }
 
-  /**
-   * Load a `Params` instance from the given path, and return it.
-   * This assumes the instance implements [[org.apache.spark.ml.util.MLReadable]].
-   */
-  def loadParamsInstance[T](path: String, sc: SparkContext): T = {
-    val metadata = DefaultXGBoostParamsReader.loadMetadata(path, sc)
-    val cls = Utils.classForName(metadata.className)
-    cls.getMethod("read").invoke(null).asInstanceOf[MLReader[T]].load(path)
-  }
+//  /**
+//   * Extract Params from metadata, and set them in the instance.
+//   * This works if all Params implement [[org.apache.spark.ml.param.Param.jsonDecode()]].
+//   * TODO: Move to [[Metadata]] method
+//   */
+//  def getAndSetParams(instance: Params, metadata: Metadata): Unit = {
+//    implicit val format = DefaultFormats
+//    metadata.params match {
+//      case JObject(pairs) =>
+//        pairs.foreach { case (paramName, jsonValue) =>
+//          val param = instance.getParam(paramName)
+//          val value = param.jsonDecode(compact(render(jsonValue)))
+//          instance.set(param, value)
+//        }
+//      case _ =>
+//        throw new IllegalArgumentException(
+//          s"Cannot recognize JSON metadata: ${metadata.metadataJson}.")
+//    }
+//  }
+//
+//  /**
+//   * Load a `Params` instance from the given path, and return it.
+//   * This assumes the instance implements [[org.apache.spark.ml.util.MLReadable]].
+//   */
+//  def loadParamsInstance[T](path: String, sc: SparkContext): T = {
+//    val metadata = DefaultXGBoostParamsReader.loadMetadata(path, sc)
+//    val cls = Utils.classForName(metadata.className)
+//    cls.getMethod("read").invoke(null).asInstanceOf[MLReader[T]].load(path)
+//  }
 }
 
